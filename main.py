@@ -4,19 +4,15 @@ import datetime as dt
 
 def parse_args(bgn_dates_options: dict[str, str]):
     args_parser = argparse.ArgumentParser(description="Entry point of this project", formatter_class=argparse.RawTextHelpFormatter)
-    args_parser.add_argument("-w", "--switch", type=str, choices=('ir', 'au', 'mr', 'tr', 'trn', 'fe', 'fen', 'ic', 'icn', 'ics', 'icns', 'icc', 'fecor', 'sig', 'simu', 'eval'),
+    args_parser.add_argument("-w", "--switch", type=str, choices=('ir', 'au', 'mr', 'tr', 'fe', 'ic', 'ics', 'icc', 'fecor', 'sig', 'simu', 'eval'),
                              help="""use this to decide which parts to run, available options = {
         'ir': instrument return,
         'au': available universe,
         'mr': market return,
         'tr': test return,
-        'trn': test return neutral,
         'fe': factors exposure,
-        'fen': factors exposure neutral,
         'ic': ic-tests,
-        'icn': ic-tests-neutral,
         'ics': ic-tests-summary,
-        'icns': ic-tests-neutral-summary,
         'icc': ic-tests-comparison,
         'fecor': factor exposure correlation,
         'sig': signals,
@@ -28,7 +24,7 @@ def parse_args(bgn_dates_options: dict[str, str]):
     args_parser.add_argument("-s", "--stp", type=str, help="""stop  date, NOT INCLUDED, must be provided if run_mode = 'o'.""")
     args_parser.add_argument("-f", "--factor", type=str, default="", help="""optional, must be provided if switch = 'factors_exposure', use this to decide which factor""",
                              choices=(
-                                 'mtm', 'size', 'oi', 'rs', 'basis', 'ts', 'liquid', 'sr', 'hr', 'netoi', 'netoiw', 'netdoi', 'netdoiw',
+                                 'mtm', 'size', 'oi', 'basis', 'ts', 'liquid', 'sr', 'hr', 'netoi', 'netoiw', 'netdoi', 'netdoiw',
                                  'skew', 'vol', 'rvol', 'cv', 'ctp', 'cvp', 'csp', 'beta', 'val', 'cbeta', 'ibeta', 'macd', 'kdj', 'rsi',),
                              )
     args_parser.add_argument("-t", "--type", type=str, default="", choices=('hedge-raw', 'hedge-ma', 'portfolio'),
@@ -55,7 +51,7 @@ def parse_args(bgn_dates_options: dict[str, str]):
 if __name__ == "__main__":
     import pandas as pd
     from setup_project import calendar_path, futures_instru_info_path
-    from config_project import bgn_dates_in_overwrite_mod, concerned_instruments_universe, sector_classification
+    from config_project import bgn_dates_in_overwrite_mod, concerned_instruments_universe
     from skyrim.whiterun import CCalendarMonthly, CInstrumentInfoTable
 
     switch, run_mode, bgn_date, stp_date, factor, sig_type, proc_num = parse_args(bgn_dates_in_overwrite_mod)
@@ -64,7 +60,6 @@ if __name__ == "__main__":
     calendar = CCalendarMonthly(calendar_path)
     instru_into_tab = CInstrumentInfoTable(futures_instru_info_path, t_index_label="windCode", t_type="CSV")
     mother_universe_df = pd.DataFrame({"instrument": concerned_instruments_universe})
-    sector_df = pd.DataFrame.from_dict({z: {sector_classification[z]: 1} for z in concerned_instruments_universe}, orient="index").fillna(0)
 
     #  ----------- CORE -----------
     if switch in ["IR"]:  # "INSTRUMENT RETURN":
@@ -108,18 +103,6 @@ if __name__ == "__main__":
         cal_test_return(
             run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
             instruments_return_dir=instruments_return_dir,
-            test_return_dir=test_return_dir,
-            calendar=calendar,
-        )
-    elif switch in ["TRN"]:  # "TEST RETURN NEUTRAL"
-        from setup_project import available_universe_dir, test_return_dir
-        from returns.test_return_neutral import cal_test_return_neutral
-
-        cal_test_return_neutral(
-            run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
-            instruments_universe=concerned_instruments_universe,
-            available_universe_dir=available_universe_dir,
-            sector_classification=sector_classification,
             test_return_dir=test_return_dir,
             calendar=calendar,
         )
@@ -315,19 +298,6 @@ if __name__ == "__main__":
             ewm_bgn_date = bgn_dates_in_overwrite_mod["FEB"]
             agent_factor = CMpFactorRSI(proc_num, factors_settings[factor]["N"], ewm_bgn_date, run_mode, bgn_date, stp_date)
             agent_factor.mp_cal_factor(futures_by_instrument_dir=futures_by_instrument_dir, major_return_db_name=major_return_db_name, **shared_keywords)
-    elif switch in ["FEN"]:
-        from config_factor import factors_raw
-        from setup_project import available_universe_dir, factors_exposure_raw_dir, factors_exposure_neu_dir
-        from factors.factors_neutral import cal_factors_neutral_mp
-
-        cal_factors_neutral_mp(
-            proc_num=proc_num, factors=factors_raw,
-            run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
-            mother_universe_df=mother_universe_df, sector_df=sector_df,
-            available_universe_dir=available_universe_dir,
-            factors_exposure_raw_dir=factors_exposure_raw_dir,
-            factors_exposure_neu_dir=factors_exposure_neu_dir,
-            calendar=calendar, )
     elif switch in ["IC"]:
         from config_factor import factors_raw
         from setup_project import ic_tests_raw_dir, available_universe_dir, factors_exposure_raw_dir, test_return_dir
@@ -343,21 +313,6 @@ if __name__ == "__main__":
             run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
             neutral_tag="RAW"
         )
-    elif switch in ["ICN"]:
-        from config_factor import factors_raw
-        from setup_project import ic_tests_neu_dir, available_universe_dir, factors_exposure_neu_dir, test_return_dir
-        from ic_tests.ic_tests_cls import cal_ic_tests_mp
-
-        cal_ic_tests_mp(
-            proc_num=proc_num, factors=factors_raw,
-            ic_tests_dir=ic_tests_neu_dir,
-            available_universe_dir=available_universe_dir,
-            exposure_dir=factors_exposure_neu_dir,
-            test_return_dir=test_return_dir,
-            calendar=calendar,
-            run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
-            neutral_tag="NEU",
-        )
     elif switch in ["ICS"]:
         from config_factor import factors_raw, factors_classification, factors_group
         from config_portfolio import selected_raw_factors
@@ -371,69 +326,52 @@ if __name__ == "__main__":
         agent_summary.get_summary_mp(factors_raw, factors_classification)
         agent_summary.get_cumsum_mp(factors_group, selected_factors_pool=factors_raw)
         agent_summary.plot_selected_factors_cumsum(selected_raw_factors)
-    elif switch in ["ICNS"]:
-        from config_factor import factors_raw, factors_classification, factors_group
-        from config_portfolio import selected_neu_factors
-        from setup_project import ic_tests_neu_dir, ic_tests_summary_dir
-        from ic_tests.ic_tests_cls_summary import CICTestsSummary
-
-        agent_summary = CICTestsSummary(
-            proc_num=proc_num, ic_tests_dir=ic_tests_neu_dir,
-            ic_tests_summary_dir=ic_tests_summary_dir, neutral_tag="NEU",
-        )
-        agent_summary.get_summary_mp(factors_raw, factors_classification)
-        agent_summary.get_cumsum_mp(factors_group, selected_factors_pool=factors_raw)
-        agent_summary.plot_selected_factors_cumsum(selected_neu_factors)
     elif switch in ["ICC"]:
         from setup_project import ic_tests_summary_dir
         from ic_tests.ic_tests_cls_summary import cal_ic_tests_comparison
 
         cal_ic_tests_comparison(ic_tests_summary_dir)
     elif switch in ["FECOR"]:
-        from setup_project import factors_exposure_raw_dir, factors_exposure_neu_dir, factors_exposure_cor_dir
+        from setup_project import factors_exposure_raw_dir, factors_exposure_cor_dir
         from factors.factors_exposure_corr import cal_factors_exposure_corr
 
         # test_factor_list_l = ["CTP120", "CSP120", "CVP120", "CSP180LD020"]
         # test_factor_list_l = ["MTM", "NETDOIWLD240"]
         test_factor_list_l = ["RSBR020", "RSBR240", "RSLR240"]
         test_factor_list_r = []
-        test_neutral_tag = ["RAW", "NEU"][0]
+        test_neutral_tag = "RAW"
 
         cal_factors_exposure_corr(
             neutral_tag=test_neutral_tag,
             test_factor_list_l=test_factor_list_l, test_factor_list_r=test_factor_list_r,
             bgn_date=bgn_date, stp_date=stp_date,
-            factors_exposure_src_dir=factors_exposure_raw_dir if test_neutral_tag == "RAW" else factors_exposure_neu_dir,
+            factors_exposure_src_dir=factors_exposure_raw_dir,
             factors_exposure_corr_dir=factors_exposure_cor_dir,
             calendar=calendar, )
     elif switch in ["SIG"]:
         if sig_type == "HEDGE-RAW":
-            from config_factor import factors_raw, factors_neu
+            from config_factor import factors_raw
             from config_portfolio import uni_props
-            from setup_project import available_universe_dir, signals_factor_raw_dir, factors_exposure_raw_dir, factors_exposure_neu_dir
+            from setup_project import available_universe_dir, signals_factor_raw_dir, factors_exposure_raw_dir
             from signals.signals_cls import cal_signals_hedge_mp
 
             cal_signals_hedge_mp(proc_num=proc_num, factors=factors_raw, uni_props=uni_props,
                                  available_universe_dir=available_universe_dir, signals_save_dir=signals_factor_raw_dir,
                                  src_factor_dir=factors_exposure_raw_dir, calendar=calendar, tips="signals-raw-hedge",
                                  run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date)
-            cal_signals_hedge_mp(proc_num=proc_num, factors=factors_neu, uni_props=uni_props,
-                                 available_universe_dir=available_universe_dir, signals_save_dir=signals_factor_raw_dir,
-                                 src_factor_dir=factors_exposure_neu_dir, calendar=calendar, tips=f"signals-neu-hedge",
-                                 run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date)
         elif sig_type == "HEDGE-MA":
-            from config_factor import factors_raw, factors_neu
+            from config_factor import factors_raw
             from config_portfolio import uni_props, mov_ave_wins
             from setup_project import signals_hedge_test_dir, signals_factor_raw_dir
             from signals.signals_cls import cal_signals_hedge_ma_mp
 
-            cal_signals_hedge_ma_mp(proc_num=proc_num, factors=factors_raw + factors_neu, uni_props=uni_props, mov_ave_wins=mov_ave_wins,
+            cal_signals_hedge_ma_mp(proc_num=proc_num, factors=factors_raw, uni_props=uni_props, mov_ave_wins=mov_ave_wins,
                                     src_signals_save_dir=signals_factor_raw_dir, signals_save_dir=signals_hedge_test_dir, calendar=calendar,
                                     tips="signals-hedge-ma", run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date)
         elif sig_type == "PORTFOLIO":
             from setup_project import signals_hedge_test_dir, signals_portfolios_dir, simulations_hedge_test_dir, signals_optimized_dir
-            from config_factor import factors_classification, factors_raw, factors_neu
-            from config_portfolio import selected_src_signal_ids_raw, selected_src_signal_ids_neu, size_raw, size_neu, trn_win, lbd, min_model_days
+            from config_factor import factors_classification, factors_raw
+            from config_portfolio import selected_src_signal_ids_raw, size_raw, trn_win, lbd, min_model_days
             from signals.signals_cls_portfolio import CSignalCombineFromOtherSignalsWithFixWeight, CSignalCombineFromOtherSignalsWithDynWeight
             from signals.signals_cls_optimizer import CSignalOptimizerMinUtyCon
             from skyrim.whiterun import SetFontGreen
@@ -444,13 +382,6 @@ if __name__ == "__main__":
             signals = CSignalCombineFromOtherSignalsWithFixWeight(
                 src_signal_weight={_: 1 / size_raw for _ in selected_src_signal_ids_raw},
                 src_signal_ids=selected_src_signal_ids_raw, src_signal_dir=signals_hedge_test_dir, sig_id="RF",
-                sig_save_dir=signals_portfolios_dir, calendar=calendar)
-            signals.main(run_mode, bgn_date, stp_date)
-
-            # NEU FIX
-            signals = CSignalCombineFromOtherSignalsWithFixWeight(
-                src_signal_weight={_: 1 / size_neu for _ in selected_src_signal_ids_neu},
-                src_signal_ids=selected_src_signal_ids_neu, src_signal_dir=signals_hedge_test_dir, sig_id="NF",
                 sig_save_dir=signals_portfolios_dir, calendar=calendar)
             signals.main(run_mode, bgn_date, stp_date)
 
@@ -469,22 +400,6 @@ if __name__ == "__main__":
                 src_signal_ids=selected_src_signal_ids_raw, src_signal_dir=signals_hedge_test_dir, sig_id="RD",
                 sig_save_dir=signals_portfolios_dir, calendar=calendar)
             signals.main(run_mode, bgn_date, stp_date)
-
-            # NEU DYN
-            optimizer = CSignalOptimizerMinUtyCon(
-                save_id="ND", src_signal_ids=selected_src_signal_ids_neu,
-                weight_bounds=(1 / size_neu / 2, 2 / size_neu), total_pos_lim=(0, 1), maxiter=10000, tol=1e-8,
-                trn_win=trn_win, min_model_days=min_model_days, lbd=lbd,
-                simu_test_dir=simulations_hedge_test_dir, optimized_dir=signals_optimized_dir,
-                calendar=calendar)
-            optimizer.main(run_mode, bgn_date, stp_date)  # only works on the last trade date of each month
-            optimizer.plot_optimized_weight(reduced=True)
-            signal_weight_df = optimizer.get_signal_weight(run_mode, bgn_date, stp_date)
-            signals = CSignalCombineFromOtherSignalsWithDynWeight(
-                src_signal_weight=signal_weight_df,
-                src_signal_ids=selected_src_signal_ids_neu, src_signal_dir=signals_hedge_test_dir, sig_id="ND",
-                sig_save_dir=signals_portfolios_dir, calendar=calendar)
-            signals.main(run_mode, bgn_date, stp_date)
     elif switch in ["SIMU"]:
         from simulations.simulation_cls import cal_simulations_mp
         from setup_project import futures_by_instrument_dir, major_return_db_name
@@ -492,11 +407,11 @@ if __name__ == "__main__":
         if sig_type == "HEDGE-MA":
             import itertools as ittl
             from setup_project import signals_hedge_test_dir, simulations_hedge_test_dir
-            from config_factor import factors_raw, factors_neu
+            from config_factor import factors_raw
             from config_portfolio import uni_props, mov_ave_wins, cost_rate_hedge_test
 
             sig_ids = [f"{sid}_UHP{int(uni_prop * 10):02d}_MA{mov_ave_win:02d}"
-                       for sid, uni_prop, mov_ave_win in ittl.product(factors_raw + factors_neu, uni_props, mov_ave_wins)]
+                       for sid, uni_prop, mov_ave_win in ittl.product(factors_raw, uni_props, mov_ave_wins)]
             cal_simulations_mp(
                 proc_num=proc_num,
                 sig_ids=sig_ids, run_mode=run_mode, test_bgn_date=bgn_date, test_stp_date=stp_date,
@@ -525,12 +440,12 @@ if __name__ == "__main__":
 
         if sig_type == "HEDGE-MA":
             from setup_project import simulations_hedge_test_dir, evaluations_hedge_test_dir
-            from config_factor import factors_raw, factors_neu, factors_classification
-            from config_portfolio import uni_props, mov_ave_wins, selected_raw_factors_and_uni_prop_ma, selected_neu_factors_and_uni_prop_ma
+            from config_factor import factors_raw, factors_classification
+            from config_portfolio import uni_props, mov_ave_wins, selected_raw_factors_and_uni_prop_ma
             from simulations.evaluations_cls import eval_hedge_ma_mp, concat_eval_ma_results, plot_selected_factors_and_uni_prop_ma
 
             eval_hedge_ma_mp(proc_num=proc_num,
-                             factors=factors_raw, factors_neutral=factors_neu, uni_props=uni_props, mov_ave_wins=mov_ave_wins,
+                             factors=factors_raw, uni_props=uni_props, mov_ave_wins=mov_ave_wins,
                              factors_classification=factors_classification,
                              indicators=performance_indicators,
                              simu_save_dir=simulations_hedge_test_dir,
@@ -539,7 +454,6 @@ if __name__ == "__main__":
                              )
             concat_eval_ma_results(uni_props, mov_ave_wins, evaluations_hedge_test_dir)
             plot_selected_factors_and_uni_prop_ma(selected_raw_factors_and_uni_prop_ma, "RAW", simulations_hedge_test_dir, evaluations_hedge_test_dir)
-            plot_selected_factors_and_uni_prop_ma(selected_neu_factors_and_uni_prop_ma, "NEU", simulations_hedge_test_dir, evaluations_hedge_test_dir)
 
         elif sig_type == "PORTFOLIO":
             from setup_project import simulations_portfolios_dir, evaluations_portfolios_dir

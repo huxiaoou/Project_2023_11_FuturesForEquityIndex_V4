@@ -8,12 +8,10 @@ python main.py -p $proc_num -w ir       -s $stp_date
 python main.py -p $proc_num -w au  -m a -b $append_date
 python main.py -p $proc_num -w mr       -s $stp_date
 python main.py -p $proc_num -w tr  -m a -b $append_date
-python main.py -p $proc_num -w trn -m a -b $append_date
 
 # factor exposure
 python main.py -p $proc_num -w fe  -m a -b $append_date -f mtm
 python main.py -p $proc_num -w fe  -m a -b $append_date -f size
-python main.py -p $proc_num -w fe  -m a -b $append_date -f rs
 python main.py -p $proc_num -w fe  -m a -b $append_date -f basis
 python main.py -p $proc_num -w fe  -m a -b $append_date -f ts
 python main.py -p $proc_num -w fe  -m a -b $append_date -f liquid
@@ -35,9 +33,7 @@ python main.py -p $proc_num -w fen -m a -b $append_date
 
 # ic tests and ic tests neutral
 python main.py -p $proc_num -w ic  -m a -b $append_date
-python main.py -p $proc_num -w icn -m a -b $append_date
 python main.py -p $proc_num -w ics
-python main.py -p $proc_num -w icns
 python main.py -p $proc_num -w icc
 
 # hedge test

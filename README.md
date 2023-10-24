@@ -6,6 +6,11 @@
 + change universe from COMMODITY to EQUITY
 + remove factor RS(or Registered Stock), which is not applied to EQUITY futures
 + rewrite factor BASIS, for a direction basis data is not available
++ reset project data from  E:\Deploy\Data\ForProjects\ to E:\ProjectsData
++ expand configuration of factors from a few to full
++ no neutralization are needed
++ change test return from OPEN to CLOSE
++ using 881001.WI as market index
 
 ## factor structure
 
@@ -43,7 +48,7 @@
 + major: return, amt, vol, oi, P(close)
 + minor: P(close)
 + agg_by_instrument: P(close), VOL, OI, AMT
-+ others: basisRate, registerStock
++ others: basisRate
 + instru_idx: open,high,low,close
 
 ## Class factors

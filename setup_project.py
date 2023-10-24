@@ -63,51 +63,47 @@ instrument_volume_db_name = global_config["futures"]["by_instrument"]["instrumen
 instrument_member_db_name = global_config["futures"]["by_instrument"]["instrument_member_db"]
 
 # --- projects data
-for_projects_dir = os.path.join(project_data_root_dir, global_config["forProjects"]["dir"])
-deploy_cta_data_dir = os.path.join(for_projects_dir, global_config["forProjects"]["cta"]["dir"])
+research_projects_data_root_dir, research_project_name = r"E:\ProjectsData", os.getcwd().split("\\")[-1]
+research_project_data_dir = os.path.join(research_projects_data_root_dir, research_project_name)
 
 # library
-instruments_return_dir = os.path.join(deploy_cta_data_dir, "instruments_return")
-available_universe_dir = os.path.join(deploy_cta_data_dir, "available_universe")
-test_return_dir = os.path.join(deploy_cta_data_dir, "test_return")
-factors_exposure_dir = os.path.join(deploy_cta_data_dir, "factors_exposure")
+instruments_return_dir = os.path.join(research_project_data_dir, "instruments_return")
+available_universe_dir = os.path.join(research_project_data_dir, "available_universe")
+test_return_dir = os.path.join(research_project_data_dir, "test_return")
+factors_exposure_dir = os.path.join(research_project_data_dir, "factors_exposure")
 factors_exposure_raw_dir = os.path.join(factors_exposure_dir, "raw")
-factors_exposure_neu_dir = os.path.join(factors_exposure_dir, "neu")
 factors_exposure_cor_dir = os.path.join(factors_exposure_dir, "cor")
-ic_tests_dir = os.path.join(deploy_cta_data_dir, "ic_tests")
+ic_tests_dir = os.path.join(research_project_data_dir, "ic_tests")
 ic_tests_raw_dir = os.path.join(ic_tests_dir, "raw")
-ic_tests_neu_dir = os.path.join(ic_tests_dir, "neu")
 ic_tests_summary_dir = os.path.join(ic_tests_dir, "summary")
 
 # portfolio
-signals_dir = os.path.join(deploy_cta_data_dir, "signals")
+signals_dir = os.path.join(research_project_data_dir, "signals")
 signals_factor_raw_dir = os.path.join(signals_dir, "factor_raw")
 signals_hedge_test_dir = os.path.join(signals_dir, "hedge_test")
 signals_portfolios_dir = os.path.join(signals_dir, "portfolios")
 signals_optimized_dir = os.path.join(signals_dir, "optimized")
 
-simulations_dir = os.path.join(deploy_cta_data_dir, "simulations")
+simulations_dir = os.path.join(research_project_data_dir, "simulations")
 simulations_hedge_test_dir = os.path.join(simulations_dir, "hedge_test")
 simulations_portfolios_dir = os.path.join(simulations_dir, "portfolios")
 
-evaluations_dir = os.path.join(deploy_cta_data_dir, "evaluations")
+evaluations_dir = os.path.join(research_project_data_dir, "evaluations")
 evaluations_hedge_test_dir = os.path.join(evaluations_dir, "hedge_test")
 evaluations_portfolios_dir = os.path.join(evaluations_dir, "portfolios")
 
 if __name__ == "__main__":
     from skyrim.winterhold import check_and_mkdir
 
-    check_and_mkdir(deploy_cta_data_dir)
+    check_and_mkdir(research_project_data_dir)
     check_and_mkdir(instruments_return_dir)
     check_and_mkdir(available_universe_dir)
     check_and_mkdir(test_return_dir)
     check_and_mkdir(factors_exposure_dir)
-    check_and_mkdir(factors_exposure_neu_dir)
     check_and_mkdir(factors_exposure_raw_dir)
     check_and_mkdir(factors_exposure_cor_dir)
     check_and_mkdir(ic_tests_dir)
     check_and_mkdir(ic_tests_raw_dir)
-    check_and_mkdir(ic_tests_neu_dir)
     check_and_mkdir(ic_tests_summary_dir)
 
     check_and_mkdir(signals_dir)
