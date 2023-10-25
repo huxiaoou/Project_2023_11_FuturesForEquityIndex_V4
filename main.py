@@ -35,7 +35,7 @@ def parse_args(bgn_dates_options: dict[str, str]):
     _switch = args.switch.upper()
     if _switch in ["ICS", "ICNS", "ICC", "EVAL"]:
         _run_mode = None
-    elif _switch in ["IR", "MR", "FECOR"]:
+    elif _switch in ["IR", "FECOR"]:
         _run_mode = "O"
     else:
         _run_mode = args.mode.upper()
@@ -87,13 +87,14 @@ if __name__ == "__main__":
             calendar=calendar,
         )
     elif switch in ["MR"]:  # "MARKET RETURN"
-        from setup_project import available_universe_dir, instruments_return_dir
+        from setup_project import instruments_return_dir, temp_dir, market_index_file
         from returns.market_return import cal_market_return
+        from config_project import market_index_id
 
         cal_market_return(
-            bgn_date=bgn_date, stp_date=stp_date,
-            available_universe_dir=available_universe_dir,
-            instruments_return_dir=instruments_return_dir,
+            run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
+            raw_data_dir=temp_dir, raw_data_file=market_index_file, market_index_id=market_index_id,
+            market_return_dir=instruments_return_dir,
             calendar=calendar,
         )
     elif switch in ["TR"]:  # "TEST RETURN"

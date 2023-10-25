@@ -54,6 +54,10 @@ cpi_m2_file = global_config["macro"]["cpi_m2_file"]
 forex_dir = os.path.join(project_data_root_dir, global_config["forex"]["dir"])
 exchange_rate_file = global_config["forex"]["exchange_rate_file"]
 
+# tmp
+temp_dir = os.path.join(project_data_root_dir, "TEMP")
+market_index_file = "market_index.xlsx"
+
 # --- by instrument
 by_instru_md_dir = os.path.join(futures_by_instrument_dir, global_config["futures"]["by_instrument"]["md"]["dir"])
 by_instru_fd_dir = os.path.join(futures_by_instrument_dir, global_config["futures"]["by_instrument"]["fd"]["dir"])
