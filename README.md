@@ -9,7 +9,6 @@
 + reset project data from  E:\Deploy\Data\ForProjects\ to E:\ProjectsData
 + expand configuration of factors from a few to full
 + no neutralization are needed
-+ change test return from OPEN to CLOSE
 + using 881001.WI as market index
 
 ## factor structure
