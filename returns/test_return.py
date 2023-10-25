@@ -1,7 +1,7 @@
 import os
 import datetime as dt
 import pandas as pd
-from struct_lib.returns_and_exposure import get_lib_struct_test_return
+from struct_lib.struct_lib import get_lib_struct_test_return
 from skyrim.falkreath import CManagerLibWriter
 from skyrim.whiterun import CCalendar, SetFontGreen, SetFontRed
 

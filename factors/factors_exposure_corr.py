@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import itertools as ittl
-from struct_lib.returns_and_exposure import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import get_lib_struct_factor_exposure
 from skyrim.winterhold import plot_lines
 from skyrim.whiterun import CCalendar
 from skyrim.falkreath import CManagerLibReader

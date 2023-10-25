@@ -2,9 +2,9 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
-from struct_lib.returns_and_exposure import (get_lib_struct_available_universe,
-                                             get_lib_struct_factor_exposure, get_lib_struct_test_return,
-                                             get_lib_struct_ic_test, )
+from struct_lib.struct_lib import (get_lib_struct_available_universe,
+                                   get_lib_struct_factor_exposure, get_lib_struct_test_return,
+                                   get_lib_struct_ic_test, )
 from skyrim.whiterun import CCalendar, SetFontGreen
 from skyrim.falkreath import CLib1Tab1, CManagerLibReader, CManagerLibWriter
 

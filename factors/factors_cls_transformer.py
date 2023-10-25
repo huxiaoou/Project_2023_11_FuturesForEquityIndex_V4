@@ -3,7 +3,7 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
-from struct_lib.returns_and_exposure import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import get_lib_struct_factor_exposure
 from skyrim.whiterun import CCalendarMonthly, SetFontGreen
 from skyrim.falkreath import CManagerLibReader
 from factors.factors_cls_base import CFactors

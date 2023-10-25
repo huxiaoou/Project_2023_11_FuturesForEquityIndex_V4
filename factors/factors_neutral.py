@@ -2,7 +2,7 @@ import datetime as dt
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
-from struct_lib.returns_and_exposure import get_lib_struct_factor_exposure, get_lib_struct_available_universe
+from struct_lib.struct_lib import get_lib_struct_factor_exposure, get_lib_struct_available_universe
 from factors.factors_shared import transform_dist, neutralize_by_sector
 from skyrim.whiterun import SetFontGreen, CCalendar
 from skyrim.falkreath import CManagerLibReader, CManagerLibWriter

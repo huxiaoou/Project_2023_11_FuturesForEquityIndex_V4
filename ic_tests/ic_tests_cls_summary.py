@@ -4,7 +4,7 @@ import multiprocessing as mp
 import sqlite3
 import numpy as np
 import pandas as pd
-from struct_lib.returns_and_exposure import get_lib_struct_ic_test
+from struct_lib.struct_lib import get_lib_struct_ic_test
 from skyrim.whiterun import SetFontGreen
 from skyrim.falkreath import CLib1Tab1, CManagerLibReader
 from skyrim.winterhold import plot_lines

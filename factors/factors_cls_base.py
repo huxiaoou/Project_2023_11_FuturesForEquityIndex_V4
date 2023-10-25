@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from struct_lib.returns_and_exposure import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import get_lib_struct_factor_exposure
 from skyrim.whiterun import CCalendarMonthly, SetFontRed, SetFontGreen
 from skyrim.falkreath import CManagerLibReader, CManagerLibWriter
 

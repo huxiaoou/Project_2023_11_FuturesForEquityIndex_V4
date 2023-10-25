@@ -1,8 +1,8 @@
 import datetime as dt
 import pandas as pd
-from struct_lib.returns_and_exposure import get_lib_struct_available_universe
+from struct_lib.struct_lib import CLibInterfaceAvailableUniverse
 from skyrim.whiterun import CCalendar, SetFontGreen, SetFontRed
-from skyrim.falkreath import CManagerLibReader, CManagerLibWriter
+from skyrim.falkreath import CManagerLibReader
 
 
 def get_available_universe_by_date(x: pd.Series, ret_df: pd.DataFrame, amt_df: pd.DataFrame, res: []):
@@ -32,9 +32,7 @@ def cal_available_universe(
     base_date = calendar.get_next_date(iter_dates[0], -rolling_win + 1)
 
     # --- initialize lib
-    available_universe_lib_structure = get_lib_struct_available_universe()
-    available_universe_lib = CManagerLibWriter(t_db_name=available_universe_lib_structure.m_lib_name, t_db_save_dir=available_universe_dir)
-    available_universe_lib.initialize_table(t_table=available_universe_lib_structure.m_tab, t_remove_existence=run_mode in ["O"])
+    available_universe_lib = CLibInterfaceAvailableUniverse(available_universe_dir).get_lib_writer(run_mode)
     dst_lib_is_continuous = available_universe_lib.check_continuity(append_date=bgn_date, t_calendar=calendar) if run_mode in ["A"] else 0
     if dst_lib_is_continuous == 0:
         # --- load all amount and return data
