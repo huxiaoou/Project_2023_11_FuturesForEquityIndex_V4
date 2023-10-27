@@ -4,7 +4,7 @@ import pandas as pd
 from factors.factors_cls_base import CDbByInstrument
 from signals.signals_cls import CSignalReader
 from skyrim.whiterun import CCalendar, SetFontGreen, SetFontYellow
-from struct_lib.portfolios import get_nav_lib_reader, get_nav_lib_writer
+from struct_lib.struct_lib import CLibInterfaceNAV
 
 
 class CSimulation(object):
@@ -23,6 +23,7 @@ class CSimulation(object):
         self.__init_dates(test_bgn_date, test_stp_date)
         self.__init_instru_ret(manager_major_return)
         self.__init_signals(signal)
+        self.lib_interface_nav = CLibInterfaceNAV(self.simu_save_dir, self.simu_id)
 
     def __init_dates(self, test_bgn_date: str, test_stp_date: str):
         __test_lag, __test_window = 1, 1
@@ -35,7 +36,7 @@ class CSimulation(object):
 
     def __check_continuity(self):
         if self.run_mode in ["A"]:
-            nav_lib_reader = get_nav_lib_reader(self.simu_id, self.simu_save_dir)
+            nav_lib_reader = self.lib_interface_nav.get_lib_reader()
             is_continuous = nav_lib_reader.check_continuity(self.iter_test_dates[0], self.calendar)
             nav_lib_reader.close()
             return is_continuous
@@ -76,7 +77,7 @@ class CSimulation(object):
 
             if self.run_mode in ["A"]:
                 last_trade_date = self.calendar.get_next_date(self.iter_test_dates[0], -1)
-                nav_lib_reader = get_nav_lib_reader(self.simu_id, self.simu_save_dir)
+                nav_lib_reader = self.lib_interface_nav.get_lib_reader()
                 df = nav_lib_reader.read_by_date(last_trade_date, ["nav"])
                 last_nav = df["nav"].iloc[-1]
             else:
@@ -91,7 +92,7 @@ class CSimulation(object):
                 nav_df["netRet"] = nav_df["rawRet"] - nav_df["fee"]
                 nav_df["nav"] = (nav_df["netRet"] + 1).cumprod() * last_nav
 
-                nav_lib_writer = get_nav_lib_writer(self.simu_id, self.simu_save_dir, self.run_mode)
+                nav_lib_writer = self.lib_interface_nav.get_lib_writer(self.run_mode)
                 nav_lib_writer.update(nav_df, True)
                 nav_lib_writer.close()
             else:
