@@ -338,7 +338,7 @@ if __name__ == "__main__":
 
         # test_factor_list_l = ["CTP120", "CSP120", "CVP120", "CSP180LD020"]
         # test_factor_list_l = ["MTM", "NETDOIWLD240"]
-        test_factor_list_l = ["RSBR020", "RSBR240", "RSLR240"]
+        test_factor_list_l = ["CTP060", "CTP120LD060", "CSP120LD060"]
         test_factor_list_r = []
         test_neutral_tag = "RAW"
 
