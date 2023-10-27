@@ -1,5 +1,5 @@
 # unilateral hold proportion
-uni_props = (0.2, 0.3, 0.4)
+uni_props = (0.4,)
 mov_ave_wins = (5, 10, 15)
 
 selected_raw_factors = (

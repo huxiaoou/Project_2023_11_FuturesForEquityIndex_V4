@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 from skyrim.whiterun import CCalendarMonthly
 from skyrim.winterhold2 import CPlotBars
-from skyrim.falkreath import CManagerLibReader, CManagerLibWriter
 from scipy.optimize import minimize, NonlinearConstraint, LinearConstraint
-from struct_lib.portfolios import get_lib_struct_signal_optimized, get_nav_df
+from struct_lib.struct_lib import CLibInterfaceSignalOpt, CLibInterfaceNAV
 
 
 def portfolio_return(w: np.ndarray, mu: np.ndarray) -> float:
@@ -89,17 +88,11 @@ def minimize_neg_sharpe(mu: np.ndarray, sigma: np.ndarray,
 
 class CSignalOptimizerReader(object):
     def __init__(self, save_id: str, optimized_dir: str):
-        self.save_id = save_id
-        self.optimized_dir = optimized_dir
-        self.optimized_struct = get_lib_struct_signal_optimized(save_id)
-
-    def _get_optimized_lib_reader(self) -> CManagerLibReader:
-        lib_reader = CManagerLibReader(self.optimized_dir, self.optimized_struct.m_lib_name)
-        lib_reader.set_default(self.optimized_struct.m_tab.m_table_name)
-        return lib_reader
+        self.save_id, self.optimized_dir = save_id, optimized_dir
+        self.optimized_lib_interface = CLibInterfaceSignalOpt(optimized_dir, save_id)
 
     def plot_optimized_weight(self, reduced: bool = False):
-        lib_reader = self._get_optimized_lib_reader()
+        lib_reader = self.optimized_lib_interface.get_lib_reader()
         optimized_df = lib_reader.read(t_value_columns=["trade_date", "signal", "value"])
         monthly_df = pd.pivot_table(data=optimized_df, index="trade_date", columns="signal", values="value")
         monthly_df.fillna(0, inplace=True)
@@ -138,14 +131,9 @@ class CSignalOptimizer(CSignalOptimizerReader):
         self.default_weights = pd.Series(data=1 / self.src_signal_qty, index=self.src_signal_ids)
         return 0
 
-    def __get_optimized_lib_writer(self, run_mode: str) -> CManagerLibWriter:
-        lib_writer = CManagerLibWriter(self.optimized_dir, self.optimized_struct.m_lib_name)
-        lib_writer.initialize_table(self.optimized_struct.m_tab, run_mode in ["O"])
-        return lib_writer
-
     def __check_continuity(self, run_mode: str, append_month: str):
         if run_mode in ["A"]:
-            lib_reader = self._get_optimized_lib_reader()
+            lib_reader = self.optimized_lib_interface.get_lib_reader()
             res = lib_reader.check_continuity_monthly(append_month, self.calendar)
             lib_reader.close()
             return res
@@ -154,7 +142,8 @@ class CSignalOptimizer(CSignalOptimizerReader):
     def __load_simu_tests(self):
         ret_data = {}
         for src_signal_id in self.src_signal_ids:
-            simu_df = get_nav_df(src_signal_id, self.simu_test_dir)
+            nav_lib_interface = CLibInterfaceNAV(self.simu_test_dir, src_signal_id)
+            simu_df = nav_lib_interface.get_nav_df()
             ret_data[src_signal_id] = simu_df["netRet"]
         self.signal_simu_ret_df = pd.DataFrame(ret_data)
         return 0
@@ -176,7 +165,7 @@ class CSignalOptimizer(CSignalOptimizerReader):
         pass
 
     def __save(self, update_df: pd.DataFrame, run_mode: str):
-        lib_writer = self.__get_optimized_lib_writer(run_mode)
+        lib_writer = self.optimized_lib_interface.get_lib_writer(run_mode)
         lib_writer.update(update_df)
         lib_writer.close()
         return 0
@@ -207,7 +196,7 @@ class CSignalOptimizer(CSignalOptimizerReader):
         last_month = self.calendar.get_next_month(bgn_month, -1)
         last_month_bgn_date = last_month + "01"
         header = pd.DataFrame({"trade_date": self.calendar.get_iter_list(last_month_bgn_date, stp_date, True)})
-        lib_reader = self._get_optimized_lib_reader()
+        lib_reader = self.optimized_lib_interface.get_lib_reader()
         optimized_df = lib_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", last_month_bgn_date),
             ("trade_date", "<", stp_date),

@@ -4,42 +4,29 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 from skyrim.whiterun import CCalendar, SetFontGreen
-from skyrim.falkreath import CManagerLibReader, CManagerLibWriter
-from struct_lib.struct_lib import get_lib_struct_available_universe, get_lib_struct_factor_exposure
-from struct_lib.portfolios import get_lib_struct_signal
+from struct_lib.struct_lib import CLibInterfaceAvailableUniverse, CLibInterfaceFactor
 
 
 class CSignal(object):
     def __init__(self, sig_id: str, sig_save_dir: str, calendar: CCalendar):
         self.sig_id = sig_id
-        self.sig_lib_struct = get_lib_struct_signal(self.sig_id)
         self.sig_save_dir = sig_save_dir
+        self.sig_lib_interface = CLibInterfaceFactor(sig_save_dir, sig_id)
         self.calendar = calendar
-
-    def _get_sig_lib_reader(self) -> CManagerLibReader:
-        lib_reader = CManagerLibReader(self.sig_save_dir, self.sig_lib_struct.m_lib_name)
-        lib_reader.set_default(self.sig_lib_struct.m_tab.m_table_name)
-        return lib_reader
-
-    def __get_sig_lib_writer(self, run_mode: str) -> CManagerLibWriter:
-        lib_writer = CManagerLibWriter(self.sig_save_dir, self.sig_lib_struct.m_lib_name)
-        lib_writer.initialize_table(self.sig_lib_struct.m_tab, run_mode in ["O"])
-        return lib_writer
 
     def __check_continuity(self, run_mode: str, bgn_date: str) -> int:
         if run_mode in ["A"]:
-            reader = self._get_sig_lib_reader()
+            reader = self.sig_lib_interface.get_lib_reader()
             res = reader.check_continuity(bgn_date, self.calendar)
             reader.close()
             return res
-        else:
-            return 0
+        return 0
 
     def _get_update_df(self, run_mode: str, bgn_date: str, stp_date: str) -> pd.DataFrame:
         pass
 
     def __save(self, update_df: pd.DataFrame, run_mode: str, use_index: bool):
-        sig_lib_writer = self.__get_sig_lib_writer(run_mode)
+        sig_lib_writer = self.sig_lib_interface.get_lib_writer(run_mode)
         sig_lib_writer.update(update_df, use_index)
         sig_lib_writer.close()
         return 0
@@ -56,7 +43,7 @@ class CSignal(object):
 
 class CSignalReader(CSignal):
     def get_signal_data(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
-        sig_lib_reader = self._get_sig_lib_reader()
+        sig_lib_reader = self.sig_lib_interface.get_lib_reader()
         sig_df = sig_lib_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", bgn_date),
             ("trade_date", "<", stp_date),
@@ -68,18 +55,12 @@ class CSignalReader(CSignal):
 class CSignalMA(CSignalReader):
     def __init__(self, src_sig_id: str, src_sig_save_dir: str, mov_ave_win: int, **kwargs):
         sig_id = f"{src_sig_id}_MA{mov_ave_win:02d}"
-        self.src_sig_id, self.src_sid_dir = src_sig_id, src_sig_save_dir
-        self.src_sig_lib_struct = get_lib_struct_signal(src_sig_id)
+        self.src_sig_lib_interface = CLibInterfaceFactor(src_sig_save_dir, src_sig_id)
         self.mov_ave_win = mov_ave_win
         super().__init__(sig_id=sig_id, **kwargs)
 
-    def __get_src_sig_lib_reader(self) -> CManagerLibReader:
-        lib_reader = CManagerLibReader(self.src_sid_dir, self.src_sig_lib_struct.m_lib_name)
-        lib_reader.set_default(self.src_sig_lib_struct.m_tab.m_table_name)
-        return lib_reader
-
     def __get_src_signal(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
-        src_lib_reader = self.__get_src_sig_lib_reader()
+        src_lib_reader = self.src_sig_lib_interface.get_lib_reader()
         src_sig_df = src_lib_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", bgn_date),
             ("trade_date", "<", stp_date),
@@ -101,17 +82,11 @@ class CSignalMA(CSignalReader):
 
 class CSignalWithAvailableUniverse(CSignalReader):
     def __init__(self, available_universe_dir: str, **kwargs):
-        self.available_universe_dir = available_universe_dir
-        self.available_universe_struct = get_lib_struct_available_universe()
+        self.available_universe_lib_interface = CLibInterfaceAvailableUniverse(available_universe_dir)
         super().__init__(**kwargs)
 
-    def __get_available_universe_lib_reader(self) -> CManagerLibReader:
-        lib_reader = CManagerLibReader(self.available_universe_dir, self.available_universe_struct.m_lib_name)
-        lib_reader.set_default(self.available_universe_struct.m_tab.m_table_name)
-        return lib_reader
-
     def _get_available_universe_df(self, bgn_date: str, stp_date: str) -> pd.DataFrame:
-        lib_reader = self.__get_available_universe_lib_reader()
+        lib_reader = self.available_universe_lib_interface.get_lib_reader()
         df = lib_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", bgn_date),
             ("trade_date", "<", stp_date),
@@ -128,18 +103,11 @@ class CSignalFromSrcFactor(CSignalWithAvailableUniverse):
         :param src_factor_dir:
         :param kwargs:
         """
-        self.src_factor_id = src_factor_id
-        self.src_factor_dir = src_factor_dir
-        self.src_factor_lib_struct = get_lib_struct_factor_exposure(self.src_factor_id)
+        self.src_factor_lib_interface = CLibInterfaceFactor(src_factor_dir, src_factor_id)
         super().__init__(sig_id=sig_id, **kwargs)
 
-    def __get_src_factor_lib_reader(self) -> CManagerLibReader:
-        lib_reader = CManagerLibReader(self.src_factor_dir, self.src_factor_lib_struct.m_lib_name)
-        lib_reader.set_default(self.src_factor_lib_struct.m_tab.m_table_name)
-        return lib_reader
-
     def _get_factor_exposure_df(self, bgn_date: str, stp_date: str):
-        lib_reader = self.__get_src_factor_lib_reader()
+        lib_reader = self.src_factor_lib_interface.get_lib_reader()
         df = lib_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", bgn_date),
             ("trade_date", "<", stp_date),
@@ -165,13 +133,12 @@ class CSignalHedge(CSignalFromSrcFactor):
     def _get_update_df(self, run_mode: str, bgn_date: str, stp_date: str) -> pd.DataFrame:
         available_universe_df = self._get_available_universe_df(bgn_date, stp_date)
         factor_exposure_df = self._get_factor_exposure_df(bgn_date, stp_date)
-        merged_df = pd.merge(left=available_universe_df, right=factor_exposure_df,
-                             on=["trade_date", "instrument"], how="inner")
+        merged_df = pd.merge(left=available_universe_df, right=factor_exposure_df, on=["trade_date", "instrument"], how="inner")
         merged_df.dropna(axis=0, subset=["value"], inplace=True)
         res_agg = merged_df.groupby(by="trade_date").apply(self.__cal_signal)
-        if type(res_agg) == pd.Series:
+        if isinstance(res_agg, pd.Series):
             update_df = res_agg.reset_index()
-        elif type(res_agg) == pd.DataFrame:
+        elif isinstance(res_agg, pd.DataFrame):
             update_df = res_agg.stack(dropna=False).reset_index()
         else:
             print("... Wrong type of result when calculate factors neutral.")

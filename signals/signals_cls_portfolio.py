@@ -1,7 +1,6 @@
 import pandas as pd
 from signals.signals_cls import CSignalReader
-from struct_lib.portfolios import get_lib_struct_signal
-from skyrim.falkreath import CManagerLibReader
+from struct_lib.struct_lib import CLibInterfaceSignal
 
 
 class CSignalCombineFromOtherSignals(CSignalReader):
@@ -13,9 +12,7 @@ class CSignalCombineFromOtherSignals(CSignalReader):
 
     def _load_src_signals(self, bgn_date: str, stp_date: str):
         for src_signal_id in self.src_signal_ids:
-            src_sig_struct = get_lib_struct_signal(src_signal_id)
-            src_sig_lib_reader = CManagerLibReader(self.src_signal_dir, src_sig_struct.m_lib_name)
-            src_sig_lib_reader.set_default(src_sig_struct.m_tab.m_table_name)
+            src_sig_lib_reader = CLibInterfaceSignal(self.src_signal_dir, src_signal_id).get_lib_reader()
             src_sig_df = src_sig_lib_reader.read_by_conditions(t_conditions=[
                 ("trade_date", ">=", bgn_date),
                 ("trade_date", "<", stp_date),
