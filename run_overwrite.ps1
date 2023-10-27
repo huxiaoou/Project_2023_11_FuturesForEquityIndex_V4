@@ -2,10 +2,10 @@ Write-Host "Run me to overwrite all data"
 $stp_date = Read-Host -Prompt "Please input the stop date, which is NOT INCLUDED, format = [YYYYMMDD]"
 $proc_num = 5
 
-#python main.py -p $proc_num -w ir       -s $stp_date
-#python main.py -p $proc_num -w au  -m o -s $stp_date
-#python main.py -p $proc_num -w mr  -m o -s $stp_date
-#python main.py -p $proc_num -w tr  -m o -s $stp_date
+python main.py -p $proc_num -w ir       -s $stp_date
+python main.py -p $proc_num -w au  -m o -s $stp_date
+python main.py -p $proc_num -w mr  -m o -s $stp_date
+python main.py -p $proc_num -w tr  -m o -s $stp_date
 
 # factor exposure
 python main.py -p $proc_num -w fe  -m o -s $stp_date -f mtm
@@ -35,18 +35,18 @@ python main.py -p $proc_num -w fe  -m o -s $stp_date -f macd
 python main.py -p $proc_num -w fe  -m o -s $stp_date -f kdj
 python main.py -p $proc_num -w fe  -m o -s $stp_date -f rsi
 
-## ic tests and ic tests neutral
-#python main.py -p $proc_num -w ic  -m o -s $stp_date
-#python main.py -p $proc_num -w ics
-#python main.py -p $proc_num -w icc
-#
-## hedge test
-#python main.py -p $proc_num -w sig  -t hedge-raw -m o -s $stp_date
-#python main.py -p $proc_num -w sig  -t hedge-ma  -m o -s $stp_date
-#python main.py -p $proc_num -w simu -t hedge-ma  -m o -s $stp_date
-#python main.py -p $proc_num -w eval -t hedge-ma
-#
-## portfolios
-#python main.py -p $proc_num -w sig  -t portfolio -m o -s $stp_date
-#python main.py -p $proc_num -w simu -t portfolio -m o -s $stp_date
-#python main.py -p $proc_num -w eval -t portfolio
+# ic tests and ic tests neutral
+python main.py -p $proc_num -w ic  -m o -s $stp_date
+python main.py -p $proc_num -w ics
+python main.py -p $proc_num -w icc
+
+# hedge test
+python main.py -p $proc_num -w sig  -t hedge-raw -m o -s $stp_date
+python main.py -p $proc_num -w sig  -t hedge-ma  -m o -s $stp_date
+python main.py -p $proc_num -w simu -t hedge-ma  -m o -s $stp_date
+python main.py -p $proc_num -w eval -t hedge-ma
+
+# portfolios
+python main.py -p $proc_num -w sig  -t portfolio -m o -s $stp_date
+python main.py -p $proc_num -w simu -t portfolio -m o -s $stp_date
+python main.py -p $proc_num -w eval -t portfolio

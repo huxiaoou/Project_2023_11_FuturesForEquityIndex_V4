@@ -70,9 +70,9 @@ class CFactorsBASIS(CFactorsWithBasis):
         return 0
 
     def _get_instrument_factor_exposure(self, instrument: str, run_mode: str, bgn_date: str, stp_date: str) -> pd.Series:
-        basis_id = "basis_rate_annual" if instrument in ["IC.CFE", "IF.CFE", "IH.CFE", "IM.CFE"] else "base_rate"
+        basis_id, sign = ("basis_rate_annual", -1) if instrument in ["IC.CFE", "IF.CFE", "IH.CFE", "IM.CFE"] else ("base_rate", 1)
         df = self.manager_basis.get_var_by_instrument(instrument, basis_id, bgn_date, stp_date)
-        return df[basis_id]
+        return df[basis_id] * sign
 
 
 class CFactorsTS(CFactorsWithMajorMinorAndMdc):

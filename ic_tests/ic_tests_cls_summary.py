@@ -4,7 +4,7 @@ import multiprocessing as mp
 import sqlite3
 import numpy as np
 import pandas as pd
-from struct_lib.struct_lib import get_lib_struct_ic_test
+from struct_lib.struct_lib import CLibInterfaceICTest
 from skyrim.whiterun import SetFontGreen
 from skyrim.falkreath import CLib1Tab1, CManagerLibReader
 from skyrim.winterhold import plot_lines
@@ -17,14 +17,6 @@ class CICTestsSummary(object):
         self.neutral_tag = neutral_tag
         self.proc_num = proc_num
 
-    def _get_ic_test_struct(self, factor: str) -> CLib1Tab1:
-        if self.neutral_tag.upper() == "RAW":
-            return get_lib_struct_ic_test(factor)
-        elif self.neutral_tag.upper() == "NEU":
-            return get_lib_struct_ic_test(f"{factor}_neu")
-        else:
-            pass
-
     def _get_summary_file_id(self) -> str:
         return f"ic_statistics-{self.neutral_tag}"
 
@@ -35,9 +27,8 @@ class CICTestsSummary(object):
         return f"ic_selected_factors-{self.neutral_tag}"
 
     def __get_ic_test_data(self, factor: str) -> pd.DataFrame:
-        ic_test_lib_struct = self._get_ic_test_struct(factor)
-        ic_test_lib = CManagerLibReader(t_db_name=ic_test_lib_struct.m_lib_name, t_db_save_dir=self.ic_tests_dir)
-        ic_test_lib.set_default(ic_test_lib_struct.m_tab.m_table_name)
+        lib_id = factor if self.neutral_tag == "RAW" else f"{factor}_neu"
+        ic_test_lib = CLibInterfaceICTest(self.ic_tests_dir, lib_id).get_lib_reader()
         ic_df = ic_test_lib.read(t_value_columns=["trade_date", "value"]).set_index("trade_date")
         ic_test_lib.close()
         ic_df.rename(mapper={"value": "ic"}, axis=1, inplace=True)
