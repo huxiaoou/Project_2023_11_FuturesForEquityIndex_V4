@@ -3,9 +3,8 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
-from struct_lib.struct_lib import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import CLibInterfaceFactor
 from skyrim.whiterun import CCalendarMonthly, SetFontGreen
-from skyrim.falkreath import CManagerLibReader
 from factors.factors_cls_base import CFactors
 
 
@@ -36,18 +35,10 @@ class CFactorsTransformer(CFactors):
         self.direction = direction
         self.factors_exposure_src_dir = factors_exposure_src_dir
         self.base_date = ""
-
-    def __get_src_lib_reader(self):
-        factor_lib_struct = get_lib_struct_factor_exposure(self.src_factor_id)
-        factor_lib = CManagerLibReader(
-            t_db_name=factor_lib_struct.m_lib_name,
-            t_db_save_dir=self.factors_exposure_src_dir
-        )
-        factor_lib.set_default(t_default_table_name=factor_lib_struct.m_tab.m_table_name)
-        return factor_lib
+        self.lib_factor_interface_src = CLibInterfaceFactor(self.factors_exposure_src_dir, self.src_factor_id)
 
     def __load_src_factor_data(self, stp_date: str):
-        src_db_reader = self.__get_src_lib_reader()
+        src_db_reader = self.lib_factor_interface_src.get_lib_reader()
         df = src_db_reader.read_by_conditions(t_conditions=[
             ("trade_date", ">=", self.base_date),
             ("trade_date", "<", stp_date),

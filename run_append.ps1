@@ -6,30 +6,36 @@ $proc_num = 5
 
 python main.py -p $proc_num -w ir       -s $stp_date
 python main.py -p $proc_num -w au  -m a -b $append_date
-python main.py -p $proc_num -w mr       -s $stp_date
+python main.py -p $proc_num -w mr  -m a -b $append_date
 python main.py -p $proc_num -w tr  -m a -b $append_date
 
 # factor exposure
 python main.py -p $proc_num -w fe  -m a -b $append_date -f mtm
 python main.py -p $proc_num -w fe  -m a -b $append_date -f size
+python main.py -p $proc_num -w fe  -m a -b $append_date -f oi
 python main.py -p $proc_num -w fe  -m a -b $append_date -f basis
 python main.py -p $proc_num -w fe  -m a -b $append_date -f ts
 python main.py -p $proc_num -w fe  -m a -b $append_date -f liquid
 python main.py -p $proc_num -w fe  -m a -b $append_date -f sr
 python main.py -p $proc_num -w fe  -m a -b $append_date -f hr
+python main.py -p $proc_num -w fe  -m a -b $append_date -f netoi
+python main.py -p $proc_num -w fe  -m a -b $append_date -f netoiw
 python main.py -p $proc_num -w fe  -m a -b $append_date -f netdoi
 python main.py -p $proc_num -w fe  -m a -b $append_date -f netdoiw
 python main.py -p $proc_num -w fe  -m a -b $append_date -f skew
 python main.py -p $proc_num -w fe  -m a -b $append_date -f vol
 python main.py -p $proc_num -w fe  -m a -b $append_date -f rvol
+python main.py -p $proc_num -w fe  -m a -b $append_date -f cv
 python main.py -p $proc_num -w fe  -m a -b $append_date -f ctp
 python main.py -p $proc_num -w fe  -m a -b $append_date -f cvp
 python main.py -p $proc_num -w fe  -m a -b $append_date -f csp
 python main.py -p $proc_num -w fe  -m a -b $append_date -f beta
+python main.py -p $proc_num -w fe  -m a -b $append_date -f val
 python main.py -p $proc_num -w fe  -m a -b $append_date -f ibeta
-
-# factors neutral
-python main.py -p $proc_num -w fen -m a -b $append_date
+python main.py -p $proc_num -w fe  -m a -b $append_date -f cbeta
+python main.py -p $proc_num -w fe  -m a -b $append_date -f macd
+python main.py -p $proc_num -w fe  -m a -b $append_date -f kdj
+python main.py -p $proc_num -w fe  -m a -b $append_date -f rsi
 
 # ic tests and ic tests neutral
 python main.py -p $proc_num -w ic  -m a -b $append_date

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import itertools as ittl
-from struct_lib.struct_lib import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import CLibInterfaceFactor
 from skyrim.winterhold import plot_lines
 from skyrim.whiterun import CCalendar
 from skyrim.falkreath import CManagerLibReader
@@ -30,15 +30,8 @@ def cal_factors_exposure_corr(neutral_tag: str,
     # --- initialize factor libs
     factor_libs_manager: dict[str, CManagerLibReader] = {}
     for factor_lbl in test_factor_list:
-        if neutral_tag == "RAW":
-            lib_struct = get_lib_struct_factor_exposure(factor_lbl)
-        else:
-            lib_struct = get_lib_struct_factor_exposure(f"{factor_lbl}_NEU")
-        factor_libs_manager[factor_lbl] = CManagerLibReader(
-            t_db_name=lib_struct.m_lib_name,
-            t_db_save_dir=factors_exposure_src_dir
-        )
-        factor_libs_manager[factor_lbl].set_default(lib_struct.m_tab.m_table_name)
+        factor_id = factor_lbl if neutral_tag == "RAW" else f"{factor_lbl}_NEU"
+        factor_libs_manager[factor_lbl] = CLibInterfaceFactor(factors_exposure_src_dir, factor_id).get_lib_reader()
 
     # --- core loop
     factor_corr_by_date_data = {}

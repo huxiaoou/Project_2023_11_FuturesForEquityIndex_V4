@@ -32,7 +32,7 @@ class CLibInterfaceMarketReturn(CLibInterface):
             t_tab=CTable({
                 "table_name": self.lib_id,
                 "primary_keys": {"trade_date": "TEXT"},
-                "value_columns": {"return": "REAL"}
+                "value_columns": {"market": "REAL"}
             })
         )
 

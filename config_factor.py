@@ -104,12 +104,13 @@ factors: list[tuple[str, str, str]] = factors_mtm + factors_size + factors_oi + 
                                       factors_ctp + factors_cvp + factors_csp + factors_beta + \
                                       factors_val + factors_cbeta + factors_ibeta + \
                                       factors_macd + factors_kdj + factors_rsi
-factors_selected = factors_mtm + factors_size + \
+factors_selected = factors_mtm + factors_size + factors_oi + \
                    factors_basis + factors_ts + factors_liquid + factors_sr + factors_hr + \
-                   factors_netdoi + factors_netdoiw + \
-                   factors_skew + factors_vol + factors_rvol + \
+                   factors_netoi + factors_netoiw + factors_netdoi + factors_netdoiw + \
+                   factors_skew + factors_vol + factors_rvol + factors_cv + \
                    factors_ctp + factors_cvp + factors_csp + factors_beta + \
-                   factors_ibeta
+                   factors_val + factors_cbeta + factors_ibeta + \
+                   factors_macd + factors_kdj + factors_rsi
 
 factors_classification: dict[str, tuple[str, str]] = {f: (sc, c) for f, sc, c in factors}
 

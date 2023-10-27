@@ -255,7 +255,7 @@ if __name__ == "__main__":
             from setup_project import instruments_return_dir
 
             agent_factor = CMpFactorWithArgWin(proc_num, factor, factors_settings[factor]["H"], run_mode, bgn_date, stp_date)
-            agent_factor.mp_cal_factor(market_return_dir=instruments_return_dir, market_return_file="market_return.csv.gz",
+            agent_factor.mp_cal_factor(market_return_dir=instruments_return_dir,
                                        futures_by_instrument_dir=futures_by_instrument_dir, major_return_db_name=major_return_db_name, **shared_keywords)
             src_factor_ids = [f"{factor}{_:03d}" for _ in factors_settings[factor]["H"]]
             direction = factors_transformation_directions.get(("BETA", "LD"), 1)

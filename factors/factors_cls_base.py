@@ -1,18 +1,19 @@
 import os
 import numpy as np
 import pandas as pd
-from struct_lib.struct_lib import get_lib_struct_factor_exposure
+from struct_lib.struct_lib import CLibInterfaceFactor, CLibInterfaceMarketReturn
 from skyrim.whiterun import CCalendarMonthly, SetFontRed, SetFontGreen
-from skyrim.falkreath import CManagerLibReader, CManagerLibWriter
+from skyrim.falkreath import CManagerLibReader
 
 
 # -----------------------------------------
 # ---------- Part I: Data Reader-----------
 # -----------------------------------------
 class CReaderMarketReturn(object):
-    def __init__(self, market_return_dir: str, market_return_file: str):
-        src_path = os.path.join(market_return_dir, market_return_file)
-        self.df = pd.read_csv(src_path, dtype={"trade_date": str}).set_index("trade_date")
+    def __init__(self, market_return_dir: str):
+        lib_interface_market_return = CLibInterfaceMarketReturn(market_return_dir)
+        lib_reader_market_return = lib_interface_market_return.get_lib_reader()
+        self.df = lib_reader_market_return.read(t_value_columns=["trade_date", "market"]).set_index("trade_date")
 
 
 class CReaderExchangeRate(object):
@@ -95,34 +96,17 @@ class CFactors(object):
         self.factors_exposure_dst_dir = factors_exposure_dst_dir
         self.calendar = calendar
         self.factor_id: str = "FactorIdNotInit"
-
-    def __get_dst_lib_reader(self) -> CManagerLibReader:
-        factor_lib_struct = get_lib_struct_factor_exposure(self.factor_id)
-        factor_lib = CManagerLibReader(
-            t_db_name=factor_lib_struct.m_lib_name,
-            t_db_save_dir=self.factors_exposure_dst_dir
-        )
-        factor_lib.set_default(t_default_table_name=factor_lib_struct.m_tab.m_table_name)
-        return factor_lib
-
-    def __get_dst_lib_writer(self, run_mode: str) -> CManagerLibWriter:
-        factor_lib_struct = get_lib_struct_factor_exposure(self.factor_id)
-        factor_lib = CManagerLibWriter(
-            t_db_name=factor_lib_struct.m_lib_name,
-            t_db_save_dir=self.factors_exposure_dst_dir
-        )
-        factor_lib.initialize_table(t_table=factor_lib_struct.m_tab, t_remove_existence=run_mode in ["O"])
-        return factor_lib
+        self.lib_factor_interface_dst: CLibInterfaceFactor | None = None
 
     def __check_continuity(self, run_mode: str, bgn_date: str) -> int:
-        factor_lib = self.__get_dst_lib_reader()
+        factor_lib = self.lib_factor_interface_dst.get_lib_reader()
         dst_lib_is_continuous = factor_lib.check_continuity(
             append_date=bgn_date, t_calendar=self.calendar) if run_mode in ["A"] else 0
         factor_lib.close()
         return dst_lib_is_continuous
 
     def __save(self, update_df: pd.DataFrame, using_index: bool, run_mode: str):
-        factor_lib = self.__get_dst_lib_writer(run_mode)
+        factor_lib = self.lib_factor_interface_dst.get_lib_writer(run_mode)
         factor_lib.update(t_update_df=update_df, t_using_index=using_index)
         factor_lib.close()
         return 0
@@ -143,6 +127,7 @@ class CFactors(object):
 
     def core(self, run_mode: str, bgn_date: str, stp_date: str):
         self._set_factor_id()
+        self.lib_factor_interface_dst = CLibInterfaceFactor(self.factors_exposure_dst_dir, self.factor_id)
         if self.__check_continuity(run_mode, bgn_date) == 0:
             update_df = self._get_update_df(run_mode, bgn_date, stp_date)
             self.__save(update_df, using_index=True, run_mode=run_mode)
@@ -180,9 +165,9 @@ class CFactorsWithMajorReturnAndArgWin(CFactorsWithMajorReturn):
 
 
 class CFactorsWithMajorReturnAndMarketReturn(CFactorsWithMajorReturnAndArgWin):
-    def __init__(self, arg_win: int, market_return_dir: str, market_return_file: str, **kwargs):
+    def __init__(self, arg_win: int, market_return_dir: str, **kwargs):
         super().__init__(arg_win=arg_win, **kwargs)
-        self.manager_market_return = CReaderMarketReturn(market_return_dir, market_return_file)
+        self.manager_market_return = CReaderMarketReturn(market_return_dir)
 
 
 class CFactorsWithMajorReturnAndExchangeRate(CFactorsWithMajorReturnAndArgWin):
