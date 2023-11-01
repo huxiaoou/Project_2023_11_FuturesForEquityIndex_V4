@@ -6,7 +6,7 @@ import pandas as pd
 from skyrim.riften import CNAV
 from skyrim.whiterun import SetFontGreen
 from skyrim.winterhold2 import CPlotLines
-from struct_lib.portfolios import get_nav_df
+from struct_lib.struct_lib import CLibInterfaceNAV
 
 
 class CEvaluation(object):
@@ -23,13 +23,13 @@ class CEvaluation(object):
     def __get_portfolio_net_ret(self) -> pd.DataFrame:
         portfolios_net_ret_data = {}
         for simu_id in self.simu_ids:
-            nav_df = get_nav_df(simu_id, self.simu_save_dir)
+            nav_df = CLibInterfaceNAV(self.simu_save_dir, simu_id).get_nav_df()
             portfolios_net_ret_data[simu_id] = nav_df["netRet"]
         portfolios_net_ret_df = pd.DataFrame(portfolios_net_ret_data)
         return portfolios_net_ret_df
 
     def __get_performance_evaluation(self, simu_id: str) -> dict:
-        simu_nav_df = get_nav_df(simu_id, self.simu_save_dir)
+        simu_nav_df = CLibInterfaceNAV(self.simu_save_dir, simu_id).get_nav_df()
         nav = CNAV(t_raw_nav_srs=simu_nav_df["netRet"], t_annual_rf_rate=self.annual_risk_free_rate, t_type="RET")
         nav.cal_all_indicators(t_method="linear")
         return nav.to_dict(t_type="eng")
@@ -194,7 +194,7 @@ def plot_selected_factors_and_uni_prop_ma(
             simu_id = f"{factor}_{uni_prop_lbl}_{ma_lbl}"
         else:
             simu_id = f"{factor}_NEU_{uni_prop_lbl}_{ma_lbl}"
-        simu_nav_df = get_nav_df(simu_id, simu_save_dir)
+        simu_nav_df = CLibInterfaceNAV(simu_save_dir, simu_id).get_nav_df()
         nav_data[simu_id] = simu_nav_df["nav"]
         ret_data[simu_id] = simu_nav_df["netRet"]
     nav_df, ret_df = pd.DataFrame(nav_data), pd.DataFrame(ret_data)

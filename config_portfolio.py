@@ -21,20 +21,15 @@ selected_raw_factors = (
 )
 
 selected_raw_factors_and_uni_prop_ma = (
-    ("RSBR240", 0.4, 5),
-    ("RSLR240", 0.3, 5),
-    ("BASISA060", 0.2, 15),
-    ("CVP180LD020", 0.4, 15),
-    ("CTP180LD020", 0.4, 15),
-    ("CSP180LD020", 0.4, 5),
-    ("CTP120", 0.3, 5),
-    ("CVP120", 0.2, 15),
-    ("CSP120", 0.3, 5),
-    ("SKEW120", 0.2, 15),
-    ("SKEW180LD020", 0.2, 15),
-    ("TSA060", 0.4, 15),
-    ("NETDOIBD020", 0.2, 10),
-    ("HRA060", 0.4, 10),
+    ("CTP120LD060", 0.4, 10),
+    ("CBETA060", 0.4, 15),
+    ("BASISBD010", 0.4, 5),
+    ("CBETA120LD060", 0.4, 5),
+    ("LIQUIDBD120", 0.4, 15),
+    ("VOL010LD020", 0.4, 5),
+    ("NETDOILD060", 0.4, 15),
+    ("CSP120LD060", 0.4, 15),
+    ("SRBD010", 0.4, 5),
 )
 selected_src_signal_ids_raw = [f"{fac}_UHP{int(uhp * 10):02d}_MA{maw:02d}" for fac, uhp, maw in selected_raw_factors_and_uni_prop_ma]
 size_raw = len(selected_src_signal_ids_raw)

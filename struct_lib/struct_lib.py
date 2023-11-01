@@ -139,8 +139,8 @@ class CLibInterfaceNAV(CLibInterface):
             t_tab=CTable({
                 "table_name": self.lib_id,
                 "primary_keys": {"trade_date": "TEXT"},
-                "value_columns": {"rawREt": "REAL", "dltWgt": "REAL", "fee": "REAL",
-                                  "netREt": "REAL", "nav": "REAL"},
+                "value_columns": {"rawRet": "REAL", "dltWgt": "REAL", "fee": "REAL",
+                                  "netRet": "REAL", "nav": "REAL"},
             })
         )
 
