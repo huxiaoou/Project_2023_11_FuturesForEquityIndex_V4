@@ -1,9 +1,8 @@
 import datetime as dt
 import numpy as np
 import pandas as pd
-from struct_lib.struct_lib import get_lib_struct_available_universe, get_lib_struct_test_return
+from struct_lib.struct_lib import CLibInterfaceAvailableUniverse, CLibInterfaceTestReturn, CLibInterfaceTestReturnNeu
 from factors.factors_shared import neutralize_by_sector
-from skyrim.falkreath import CManagerLibReader, CManagerLibWriterByDate
 from skyrim.whiterun import CCalendar, SetFontGreen, SetFontRed
 
 
@@ -18,9 +17,7 @@ def cal_test_return_neutral(
     _weight_id = "amount"
 
     # --- available universe
-    available_universe_lib_structure = get_lib_struct_available_universe()
-    available_universe_lib = CManagerLibReader(t_db_name=available_universe_lib_structure.m_lib_name, t_db_save_dir=available_universe_dir)
-    available_universe_lib.set_default(available_universe_lib_structure.m_tab.m_table_name)
+    available_universe_lib = CLibInterfaceAvailableUniverse(available_universe_dir).get_lib_reader()
 
     # --- mother universe
     mother_universe_df = pd.DataFrame({"instrument": instruments_universe})
@@ -29,14 +26,10 @@ def cal_test_return_neutral(
     sector_df = pd.DataFrame.from_dict({z: {sector_classification[z]: 1} for z in instruments_universe}, orient="index").fillna(0)
 
     # --- test return library
-    test_return_lib_structure = get_lib_struct_test_return("test_return")
-    test_return_lib = CManagerLibReader(t_db_name=test_return_lib_structure.m_lib_name, t_db_save_dir=test_return_dir)
-    test_return_lib.set_default(test_return_lib_structure.m_tab.m_table_name)
+    test_return_lib = CLibInterfaceTestReturn(test_return_dir).get_lib_reader()
 
     # --- test return neutral library
-    test_return_neutral_lib_structure = get_lib_struct_test_return(f"test_return_neu")
-    test_return_neutral_lib = CManagerLibWriterByDate(t_db_name=test_return_neutral_lib_structure.m_lib_name, t_db_save_dir=test_return_dir)
-    test_return_neutral_lib.initialize_table(t_table=test_return_neutral_lib_structure.m_tab, t_remove_existence=run_mode in ["O"])
+    test_return_neutral_lib = CLibInterfaceTestReturnNeu(test_return_dir).get_lib_writer(run_mode)
     dst_lib_is_continuous = test_return_neutral_lib.check_continuity(append_date=bgn_date, t_calendar=calendar) if run_mode in ["A"] else 0
     if dst_lib_is_continuous == 0:
         for trade_date in calendar.get_iter_list(t_bgn_date=bgn_date, t_stp_date=stp_date, t_ascending=True):

@@ -1,5 +1,5 @@
 import pandas as pd
-from skyrim.falkreath import CLib1Tab1, CTable, CManagerLibReader, CManagerLibWriter
+from skyrim.falkreath import CLib1Tab1, CTable, CManagerLibReader, CManagerLibWriterByDate
 
 
 class CLibInterface(object):
@@ -11,13 +11,13 @@ class CLibInterface(object):
     def get_lib_struct(self) -> CLib1Tab1:
         pass
 
-    def get_lib_reader(self):
+    def get_lib_reader(self) -> CManagerLibReader:
         lib_reader = CManagerLibReader(self.lib_save_dir, self.lib_struct.m_lib_name)
         lib_reader.set_default(self.lib_struct.m_tab.m_table_name)
         return lib_reader
 
-    def get_lib_writer(self, run_mode: str):
-        lib_writer = CManagerLibWriter(self.lib_save_dir, self.lib_struct.m_lib_name)
+    def get_lib_writer(self, run_mode: str) -> CManagerLibWriterByDate:
+        lib_writer = CManagerLibWriterByDate(self.lib_save_dir, self.lib_struct.m_lib_name)
         lib_writer.initialize_table(self.lib_struct.m_tab, t_remove_existence=run_mode in ["O"], t_set_as_default=True)
         return lib_writer
 
@@ -70,6 +70,21 @@ class CLibInterfaceTestReturn(CLibInterface):
 class CLibInterfaceTestReturnNeu(CLibInterface):
     def __init__(self, lib_save_dir: str):
         super().__init__(lib_save_dir=lib_save_dir, lib_id="test_return_neu")
+
+    def get_lib_struct(self) -> CLib1Tab1:
+        return CLib1Tab1(
+            t_lib_name=f"{self.lib_id}.db",
+            t_tab=CTable({
+                "table_name": self.lib_id,
+                "primary_keys": {"trade_date": "TEXT", "instrument": "TEXT"},
+                "value_columns": {"value": "REAL"},
+            })
+        )
+
+
+class CLibInterfaceTestReturnOpn(CLibInterface):
+    def __init__(self, lib_save_dir: str):
+        super().__init__(lib_save_dir=lib_save_dir, lib_id="test_return_opn")
 
     def get_lib_struct(self) -> CLib1Tab1:
         return CLib1Tab1(

@@ -98,8 +98,9 @@ if __name__ == "__main__":
             calendar=calendar,
         )
     elif switch in ["TR"]:  # "TEST RETURN"
-        from setup_project import instruments_return_dir, test_return_dir
+        from setup_project import instruments_return_dir, test_return_dir, by_instru_md_dir, futures_by_instrument_dir
         from returns.test_return import cal_test_return
+        from returns.test_return_opn import cal_test_return_opn, CReaderMd, CReaderMajor
 
         cal_test_return(
             run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
@@ -107,6 +108,15 @@ if __name__ == "__main__":
             test_return_dir=test_return_dir,
             calendar=calendar,
         )
+
+        reader_md = CReaderMd(universe=concerned_instruments_universe, by_instru_md_dir=by_instru_md_dir)
+        reader_major = CReaderMajor(major_minor_db_dir=futures_by_instrument_dir)
+        cal_test_return_opn(
+            universe=concerned_instruments_universe, reader_md=reader_md, reader_major=reader_major,
+            run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
+            test_return_dir=test_return_dir, calendar=calendar
+        )
+
     elif switch in ["FE"]:
         from setup_project import futures_by_instrument_dir, major_return_db_name, factors_exposure_raw_dir
         from config_factor import factors_settings, factors_transformation_directions
