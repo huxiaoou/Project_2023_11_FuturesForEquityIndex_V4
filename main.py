@@ -413,7 +413,7 @@ if __name__ == "__main__":
             signals.main(run_mode, bgn_date, stp_date)
     elif switch in ["SIMU"]:
         from simulations.simulation_cls import cal_simulations_mp
-        from setup_project import futures_by_instrument_dir, major_return_db_name
+        from setup_project import test_return_dir
 
         if sig_type == "HEDGE-MA":
             import itertools as ittl
@@ -428,7 +428,7 @@ if __name__ == "__main__":
                 sig_ids=sig_ids, run_mode=run_mode, test_bgn_date=bgn_date, test_stp_date=stp_date,
                 cost_rate=cost_rate_hedge_test, test_universe=concerned_instruments_universe,
                 signals_dir=signals_hedge_test_dir, simulations_dir=simulations_hedge_test_dir,
-                futures_by_instrument_dir=futures_by_instrument_dir, major_return_db_name=major_return_db_name,
+                test_return_dir=test_return_dir,
                 calendar=calendar, tips="Simulation for hedge-test factors with MA"
             )
 
@@ -443,7 +443,7 @@ if __name__ == "__main__":
                 sig_ids=test_portfolio_ids, run_mode=run_mode, test_bgn_date=bgn_date, test_stp_date=stp_date,
                 cost_rate=cost_rate_portfolios, test_universe=concerned_instruments_universe,
                 signals_dir=signals_portfolios_dir, simulations_dir=simulations_portfolios_dir,
-                futures_by_instrument_dir=futures_by_instrument_dir, major_return_db_name=major_return_db_name,
+                test_return_dir=test_return_dir,
                 calendar=calendar, tips="Simulation for portfolios"
             )
     elif switch in ["EVAL"]:

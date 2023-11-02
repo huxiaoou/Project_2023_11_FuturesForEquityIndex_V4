@@ -1,16 +1,15 @@
 import datetime as dt
 import multiprocessing as mp
 import pandas as pd
-from factors.factors_cls_base import CDbByInstrument
 from signals.signals_cls import CSignalReader
 from skyrim.whiterun import CCalendar, SetFontGreen, SetFontYellow
-from struct_lib.struct_lib import CLibInterfaceNAV
+from struct_lib.struct_lib import CLibInterfaceNAV, CLibInterfaceTestReturnOpn
 
 
 class CSimulation(object):
     def __init__(self, signal: CSignalReader, run_mode: str, test_bgn_date: str, test_stp_date: str,
                  cost_rate: float, test_universe: list[str],
-                 manager_major_return: CDbByInstrument,
+                 lib_interface_test_return_opn: CLibInterfaceTestReturnOpn,
                  simu_save_dir: str, calendar: CCalendar
                  ):
         self.cost_rate = cost_rate
@@ -21,7 +20,7 @@ class CSimulation(object):
 
         self.run_mode = run_mode
         self.__init_dates(test_bgn_date, test_stp_date)
-        self.__init_instru_ret(manager_major_return)
+        self.__init_instru_ret(lib_interface_test_return_opn)
         self.__init_signals(signal)
         self.lib_interface_nav = CLibInterfaceNAV(self.simu_save_dir, self.simu_id)
 
@@ -42,18 +41,18 @@ class CSimulation(object):
             return is_continuous
         return 0
 
-    def __init_instru_ret(self, manager_major_return: CDbByInstrument):
+    def __init_instru_ret(self, lib_interface_test_return_opn: CLibInterfaceTestReturnOpn):
         instru_ret_data = {}
-        ret_db_reader = manager_major_return.get_db_reader()
+        test_return_db_reader = lib_interface_test_return_opn.get_lib_reader()
         for instrument in self.test_universe:
-            ret_df = ret_db_reader.read_by_conditions(t_conditions=[
+            ret_df = test_return_db_reader.read_by_conditions(t_conditions=[
                 ("trade_date", ">=", self.test_bgn_date),
                 ("trade_date", "<", self.test_stp_date),
-            ], t_value_columns=["trade_date", "major_return"],
-                t_table_name=instrument.replace(".", "_"), t_using_default_table=False)
+                ("instrument", "=", instrument),
+            ], t_value_columns=["trade_date", "value"])
             ret_df.set_index("trade_date", inplace=True)
-            instru_ret_data[instrument] = ret_df["major_return"]
-        ret_db_reader.close()
+            instru_ret_data[instrument] = ret_df["value"]
+        test_return_db_reader.close()
         self.instru_ret_df = pd.DataFrame(instru_ret_data).fillna(0)
         return 0
 
@@ -103,17 +102,15 @@ class CSimulation(object):
 def cal_simulations_mp(proc_num: int,
                        sig_ids: list[str], run_mode: str, test_bgn_date: str, test_stp_date: str,
                        cost_rate: float, test_universe: list[str],
-                       signals_dir: str, simulations_dir: str,
-                       futures_by_instrument_dir: str, major_return_db_name: str,
-                       calendar: CCalendar,
-                       tips: str):
+                       test_return_dir: str, signals_dir: str, simulations_dir: str,
+                       calendar: CCalendar, tips: str):
     t0 = dt.datetime.now()
     pool = mp.Pool(processes=proc_num)
     for sig_id in sig_ids:
         signal = CSignalReader(sig_id=sig_id, sig_save_dir=signals_dir, calendar=calendar)
         simu = CSimulation(signal=signal, run_mode=run_mode, test_bgn_date=test_bgn_date, test_stp_date=test_stp_date,
                            cost_rate=cost_rate, test_universe=test_universe,
-                           manager_major_return=CDbByInstrument(futures_by_instrument_dir, major_return_db_name),
+                           lib_interface_test_return_opn=CLibInterfaceTestReturnOpn(test_return_dir),
                            simu_save_dir=simulations_dir, calendar=calendar)
         pool.apply_async(simu.main)
     pool.close()

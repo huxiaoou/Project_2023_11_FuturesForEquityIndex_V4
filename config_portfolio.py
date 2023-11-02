@@ -21,20 +21,15 @@ selected_raw_factors = (
 )
 
 selected_raw_factors_and_uni_prop_ma = (
-    ("CTP120LD060", 0.4, 10),
-    ("CBETA060", 0.4, 15),
     ("BASISBD010", 0.4, 5),
-    ("CBETA120LD060", 0.4, 5),
+    ("CTP120LD060", 0.4, 15),
+    ("CBETA060", 0.4, 15),
     ("LIQUIDBD120", 0.4, 15),
-    ("VOL010LD020", 0.4, 5),
-    ("NETDOILD060", 0.4, 15),
-    ("CSP120LD060", 0.4, 15),
-    ("SRBD010", 0.4, 5),
 )
 selected_src_signal_ids_raw = [f"{fac}_UHP{int(uhp * 10):02d}_MA{maw:02d}" for fac, uhp, maw in selected_raw_factors_and_uni_prop_ma]
 size_raw = len(selected_src_signal_ids_raw)
 
-trn_win, lbd = 3, 20  # optimized
+trn_win, lbd = 6, 200  # optimized
 min_model_days = int(trn_win * 20 * 0.9)
 test_portfolio_ids = [
     "RF",  # "raw_fix",

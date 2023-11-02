@@ -66,7 +66,7 @@ class CEvaluation(object):
         portfolios_net_ret_df = self.__get_portfolio_net_ret()
         portfolios_nav_df = (portfolios_net_ret_df + 1).cumprod()
         artist = CPlotLines(plot_df=portfolios_nav_df, fig_name="portfolios_nav",
-                            line_color=["#708090", "#000000", "#4169E1", "#8B0000"], line_style=["--", "--", "--", "-"],
+                            line_color=["#4169E1", "#8B0000"], line_style=["--", "-"],
                             fig_save_dir=self.eval_save_dir, xtick_label_size=16, ytick_label_size=16)
         artist.plot()
         return 0
@@ -78,7 +78,7 @@ class CEvaluation(object):
             trade_year_ret = trade_year_df.drop("trade_year", axis=1)
             trade_year_nav = (trade_year_ret + 1).cumprod()
             artist = CPlotLines(plot_df=trade_year_nav, fig_name=f"portfolios_nav_{trade_year}",
-                                line_color=["#708090", "#000000", "#4169E1", "#8B0000"], line_style=["--", "--", "--", "-"],
+                                line_color=["#4169E1", "#8B0000"], line_style=["--", "-"],
                                 fig_save_dir=self.eval_save_dir, xtick_label_size=16, ytick_label_size=16)
             artist.plot()
         return 0
