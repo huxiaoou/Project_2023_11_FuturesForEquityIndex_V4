@@ -116,7 +116,6 @@ if __name__ == "__main__":
             run_mode=run_mode, bgn_date=bgn_date, stp_date=stp_date,
             test_return_dir=test_return_dir, calendar=calendar
         )
-
     elif switch in ["FE"]:
         from setup_project import futures_by_instrument_dir, major_return_db_name, factors_exposure_raw_dir
         from config_factor import factors_settings, factors_transformation_directions
@@ -348,7 +347,8 @@ if __name__ == "__main__":
 
         # test_factor_list_l = ["CTP120", "CSP120", "CVP120", "CSP180LD020"]
         # test_factor_list_l = ["MTM", "NETDOIWLD240"]
-        test_factor_list_l = ["CTP060", "CTP120LD060", "CSP120LD060"]
+        # test_factor_list_l = ["CTP060", "CTP120LD060", "CSP120LD060"]
+        test_factor_list_l = ["BASIS", "BASISA060", "BASISBD020", "BASISLD060"]
         test_factor_list_r = []
         test_neutral_tag = "RAW"
 

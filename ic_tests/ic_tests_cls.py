@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing as mp
 from struct_lib.struct_lib import (CLibInterfaceAvailableUniverse, CLibInterfaceFactor,
-                                   CLibInterfaceTestReturn, CLibInterfaceTestReturnNeu, CLibInterfaceICTest)
+                                   CLibInterfaceTestReturnOpn, CLibInterfaceTestReturnNeu, CLibInterfaceICTest)
 from skyrim.whiterun import CCalendar, SetFontGreen
 
 
@@ -23,7 +23,7 @@ class CICTests(object):
 
         self.lib_available_universe = CLibInterfaceAvailableUniverse(self.available_universe_dir)
         self.lib_factor_exposure: CLibInterfaceFactor | None = None
-        self.lib_test_return: CLibInterfaceTestReturn | CLibInterfaceTestReturnNeu | None = None
+        self.lib_test_return: CLibInterfaceTestReturnOpn | CLibInterfaceTestReturnNeu | None = None
         self.lib_ic_test: CLibInterfaceICTest | None = None
 
     @staticmethod
@@ -103,7 +103,7 @@ class CICTestsRaw(CICTests):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.lib_factor_exposure = CLibInterfaceFactor(self.exposure_dir, self.factor)
-        self.lib_test_return = CLibInterfaceTestReturn(self.test_return_dir)
+        self.lib_test_return = CLibInterfaceTestReturnOpn(self.test_return_dir)
         self.lib_ic_test = CLibInterfaceICTest(self.dst_dir, self.factor)
 
 

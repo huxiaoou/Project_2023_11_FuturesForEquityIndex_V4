@@ -40,7 +40,6 @@ python main.py -p $proc_num -w fe  -m a -b $append_date -f rsi
 # ic tests and ic tests neutral
 python main.py -p $proc_num -w ic  -m a -b $append_date
 python main.py -p $proc_num -w ics
-python main.py -p $proc_num -w icc
 
 # hedge test
 python main.py -p $proc_num -w sig  -t hedge-raw -m a -b $append_date
